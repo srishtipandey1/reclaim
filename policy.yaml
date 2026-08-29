@@ -1,0 +1,31 @@
+policy_version: "1.0"
+evaluation_set_frozen: true
+
+contact_rules:
+  allowed_hours_local: ["08:00", "19:00"]
+  timezone: "Asia/Kolkata"
+  max_nudges_per_subscription: 2
+  min_hours_between_nudges: 48
+  channels_covered: ["sms", "email", "whatsapp"]
+
+action_rules:
+  - cause: "dead_or_expired_card"
+    confidence_threshold: 0.75
+    action: "send_update_payment_nudge"
+    max_attempts: 1
+    fallback: "escalate_to_human"
+  - cause: "insufficient_funds_pattern"
+    confidence_threshold: 0.70
+    action: "schedule_delayed_manual_charge"
+    delay_days: 3
+    max_attempts: 1
+    fallback: "send_update_payment_nudge"
+  - cause: "ambiguous_or_low_confidence"
+    confidence_threshold: 0.0
+    action: "escalate_to_human"
+    max_attempts: 0
+
+hard_constraints:
+  never_exceed_total_actions_per_invoice: 3
+  never_act_outside_allowed_hours: true
+  never_skip_audit_log_write: true
