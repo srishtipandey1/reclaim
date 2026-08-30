@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS subscriptions (
             'completed'
         )
     ),
+    state_event_at INTEGER NOT NULL DEFAULT 0,
     case_state TEXT NOT NULL CHECK (
         case_state IN (
             'none',
