@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS invoices (
     razorpay_invoice_id TEXT,
     amount INTEGER NOT NULL DEFAULT 0,
     currency TEXT NOT NULL DEFAULT 'INR',
-    status TEXT NOT NULL DEFAULT 'issued',
+    status TEXT NOT NULL DEFAULT 'issued' CHECK (status IN ('issued', 'paid', 'attempt_failed')),
     issue_date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     due_date TEXT,
     FOREIGN KEY (subscription_id) REFERENCES subscriptions(id)
@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS webhook_events (
     subscription_id TEXT,
     event_type TEXT NOT NULL,
     raw_payload TEXT NOT NULL,
+    event_created_at INTEGER NOT NULL DEFAULT 0,
     received_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
