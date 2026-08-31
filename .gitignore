@@ -13,3 +13,8 @@ data/
 verification_*.txt
 literal_*.txt
 
+
+run_eval*.txt
+eval_run*.txt
+*_output.txt
+status.txt
