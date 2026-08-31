@@ -21,7 +21,6 @@ action_rules:
     max_attempts: 1
     fallback: "send_update_payment_nudge"
   - cause: "ambiguous_or_low_confidence"
-    confidence_threshold: 0.0
     action: "escalate_to_human"
     max_attempts: 0
 

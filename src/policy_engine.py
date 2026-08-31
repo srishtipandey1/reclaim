@@ -41,6 +41,10 @@ class PolicyEngine:
         parsed = analyst.validate_raw(raw)
         if parsed is None:
             return PolicyDecision('escalated', 'malformed model output')
+
+        if str(parsed.classification) == 'ambiguous_or_low_confidence':
+            return PolicyDecision('escalated', 'ambiguous classification requires escalation', 'escalate_to_human')
+
         return self.decide(
             recommended_action=parsed.recommended_action,
             classification=parsed.classification,

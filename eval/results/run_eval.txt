@@ -13,4 +13,4 @@
 | Lift vs. blind-retry-once baseline | 0.000 | -0.167 | 0.000 | -0.062 |
 
 Unresolved reasons:
-- eval_12: expected escalation, got RecommendedActionEnum.SCHEDULE_DELAYED_MANUAL_CHARGE (unsafe money action allowed by policy; flagged)
+- eval_13: expected escalation, got RecommendedActionEnum.SEND_UPDATE_PAYMENT_NUDGE (unsafe money action allowed by policy; flagged)

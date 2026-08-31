@@ -1,8 +1,14 @@
 from __future__ import annotations
 
+import json
+import os
 from typing import Any
 
+from dotenv import load_dotenv
+from groq import Groq
 from pydantic import ValidationError
+
+load_dotenv(override=True)
 
 from src.models import AnalystClassification, ClassificationEnum, RecommendedActionEnum
 
@@ -12,6 +18,14 @@ class BaseAnalyst:
         raise NotImplementedError
 
     def validate_raw(self, raw: dict[str, Any]) -> AnalystClassification | None:
+        if not isinstance(raw, dict):
+            return None
+
+        classification = raw.get('classification')
+        recommended_action = raw.get('recommended_action')
+        if str(classification) == 'ambiguous_or_low_confidence' and str(recommended_action) != 'escalate_to_human':
+            return None
+
         try:
             return AnalystClassification.model_validate(raw)
         except ValidationError:
@@ -89,6 +103,100 @@ class RuleBasedAnalyst(BaseAnalyst):
             evidence=evidence,
             recommended_action=RecommendedActionEnum.ESCALATE_TO_HUMAN,
         )
+
+
+class GeminiAnalyst(BaseAnalyst):
+    def __init__(self, api_key: str | None = None, model: str = 'gemini-flash-latest') -> None:
+        self.api_key = api_key or os.getenv('GEMINI_API_KEY')
+        self.model = model
+
+    def classify(self, context: Any) -> AnalystClassification | None:
+        if not isinstance(context, dict):
+            return None
+
+        reason = str(context.get('reason', '')).strip()
+        amount = context.get('amount')
+        if not reason or amount is None:
+            return None
+
+        prompt = (
+            'You are a subscription recovery classifier. classify the reason a payment failed for a halted subscription.\n'
+            'Return JSON only with these keys: classification, confidence, evidence, recommended_action.\n'
+            'classification must be exactly one of: dead_or_expired_card, insufficient_funds_pattern, ambiguous_or_low_confidence, already_resolved, duplicate_or_replay.\n'
+            'recommended_action must be exactly one of: send_update_payment_nudge, schedule_delayed_manual_charge, escalate_to_human.\n'
+            'If classification is ambiguous_or_low_confidence, recommended_action MUST be escalate_to_human — no other value is valid for that classification.\n'
+            'confidence must be a number between 0.0 and 1.0 inclusive.\n'
+            'evidence must be a list of strings.\n'
+            f'reason: {reason}\namount: {amount}\n'
+        )
+
+        try:
+            client = genai.Client(api_key=self.api_key)
+            response = client.models.generate_content(
+                model=self.model,
+                contents=prompt,
+                config={'response_mime_type': 'application/json', 'temperature': 0.0},
+            )
+            raw_text = getattr(response, 'text', None)
+            if raw_text is None:
+                raw_text = str(response)
+            payload = raw_text.strip()
+            if payload.startswith('```'):
+                payload = payload.strip('`')
+                if payload.startswith('json'):
+                    payload = payload[4:].lstrip()
+            parsed = json.loads(payload)
+            return self.validate_raw(parsed)
+        except Exception:
+            return None
+
+
+class GroqAnalyst(BaseAnalyst):
+    def __init__(self, api_key: str | None = None, model: str = 'openai/gpt-oss-120b') -> None:
+        self.api_key = api_key or os.getenv('GROQ_API_KEY')
+        self.model = model
+
+    def classify(self, context: Any) -> AnalystClassification | None:
+        if not isinstance(context, dict):
+            return None
+
+        reason = str(context.get('reason', '')).strip()
+        amount = context.get('amount')
+        if not reason or amount is None:
+            return None
+
+        prompt = (
+            'You are a subscription recovery classifier. classify the reason a payment failed for a halted subscription.\n'
+            'Return JSON only with these keys: classification, confidence, evidence, recommended_action.\n'
+            'classification must be exactly one of: dead_or_expired_card, insufficient_funds_pattern, ambiguous_or_low_confidence, already_resolved, duplicate_or_replay.\n'
+            'recommended_action must be exactly one of: send_update_payment_nudge, schedule_delayed_manual_charge, escalate_to_human.\n'
+            'If classification is ambiguous_or_low_confidence, recommended_action MUST be escalate_to_human — no other value is valid for that classification.\n'
+            'confidence must be a number between 0.0 and 1.0 inclusive.\n'
+            'evidence must be a list of strings.\n'
+            f'reason: {reason}\namount: {amount}\n'
+        )
+
+        try:
+            client = Groq(api_key=self.api_key)
+            response = client.chat.completions.create(
+                messages=[{'role': 'user', 'content': prompt}],
+                model=self.model,
+                temperature=0.0,
+                response_format={'type': 'json_object'},
+            )
+            raw_text = response.choices[0].message.content
+            if raw_text is None:
+                return None
+            payload = raw_text.strip()
+            if payload.startswith('```'):
+                payload = payload.strip('`')
+                if payload.startswith('json'):
+                    payload = payload[4:].lstrip()
+            parsed = json.loads(payload)
+            return self.validate_raw(parsed)
+        except Exception as exc:
+            print(repr(exc))
+            return None
 
 
 class InvalidSchemaAnalyst(BaseAnalyst):

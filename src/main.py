@@ -3,8 +3,11 @@ from __future__ import annotations
 import logging
 import os
 
+from dotenv import load_dotenv
 from fastapi import BackgroundTasks, FastAPI, Request
 from fastapi.responses import PlainTextResponse, Response
+
+load_dotenv()
 
 from src.db import get_db_path, init_db
 from src.webhooks import process_webhook_event, verify_signature

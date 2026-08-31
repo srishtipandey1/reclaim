@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.analyst import RuleBasedAnalyst
+from src.analyst import GroqAnalyst
 from src.policy_engine import PolicyEngine
 
 EVAL_ROOT = ROOT / 'eval'
@@ -175,24 +175,22 @@ def format_ci(rate: float, low: float, high: float) -> str:
 
 def evaluate_cases(cases: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[str]]:
     engine = PolicyEngine()
-    analyst = RuleBasedAnalyst()
+    analyst = GroqAnalyst()
     records: list[dict[str, Any]] = []
     unresolved_reasons: list[str] = []
 
     for case in cases:
         now = datetime(2026, 1, 15, 10, 30)
-        context = {
-            'subscription_id': case['id'],
-            'invoice_id': f"{case['id']}-invoice",
-            'amount': case['amount'],
-            'currency': 'INR',
+        scoring_only = {
             'archetype': case['archetype'],
+            'should_recover': case['should_recover'],
+        }
+        evidence = {
             'reason': case.get('reason', ''),
-            'case_summary': case.get('reason', ''),
-            'failure_pattern': case['archetype'],
+            'amount': case['amount'],
         }
 
-        analyst_result = analyst.classify(context)
+        analyst_result = analyst.classify(evidence)
         decision = engine.decide_from_raw(
             analyst_result.model_dump(),
             analyst=analyst,

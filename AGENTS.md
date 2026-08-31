@@ -107,9 +107,12 @@ future work. Do not build them now.
   explicitly blacklists `ngrok.io` (and `loca.lt`) as a webhook URL domain.
 - Setting up a webhook in test mode prompts for an OTP in the dashboard; the default test-mode OTP
   is `754081`.
-- Before writing any automation code, verify directly against the live Subscriptions API reference
-  whether the test-mode failure/success simulation can be triggered via API call or is dashboard-only.
-  This is not yet confirmed — Prompt 1 requires resolving it first.
+- Confirmed via Prompt 1's own research: test-mode charge-failure simulation is dashboard-only, not
+  scriptable via the REST API or the official Python SDK (verified against the full Subscriptions
+  API reference and the SDK source directly). The dashboard's manual test-charge trigger applies
+  immediately, not bound to the real once-a-day retry cadence — confirmed directly from Razorpay's
+  own Test Subscriptions documentation. Plan creation and Subscription creation remain fully
+  API-scriptable regardless.
 
 ## 5. Architecture
 
@@ -178,7 +181,27 @@ razorpay-recovery-agent/
 Freeze `eval_set` before any policy tuning begins. Tune only against `design_set`. Report headline
 numbers only from `eval_set`.
 
-Scenario battery: 20–30 total. Include the clean, cleanly-classifiable cases (dead/expired card,
+**Two data cohorts, both required, each case labeled with a `data_source` field** (`fixture` or
+`live_dashboard`). Razorpay's test-mode charge-failure simulation is dashboard-only, not
+API-scriptable. A small cohort of 8-12 subscriptions is created via API and manually driven through
+real dashboard-triggered failures to `halted`; the full pipeline runs against these for real —
+classification, policy decision, API execution, webhook verification — proving the system works end
+to end against live test infrastructure. The larger scenario battery below is fixture-based: failure
+history and context constructed directly as realistic local data rather than organically driven
+through the dashboard, since that's where the statistical rigor actually lives and constructing
+evaluation data this way is standard practice. State this split explicitly in the README.
+
+Scenario battery: 20–30 total.
+
+**Classifier inputs must never include ground-truth label fields.** Every eval case has evidence
+fields (what a classifier is allowed to see — reason, amount, and in the full system the
+RecoveryContext's failure/payment history) and label fields (archetype, should_recover — used only
+to score output after classification runs). A classifier that reads a label field directly isn't
+being evaluated, it's being handed the answer. Found the hard way: an early rules-based classifier
+checked archetype directly for two of three archetypes, meaning those cases were never actually
+classified at all — only the third, where the check didn't short-circuit, forced real reasoning,
+and that's precisely where it broke. Keep evidence and label fields in separate objects at
+construction time so this can't recur silently. Include the clean, cleanly-classifiable cases (dead/expired card,
 insufficient-funds pattern, one-off technical decline, already-manually-attempted, already-resolved,
 duplicate webhook, unknown-subscription-ID) AND at least 4–5 deliberately ambiguous cases with
 overlapping signals (e.g. a near-expiry card on an account with an intermittent insufficient-funds
