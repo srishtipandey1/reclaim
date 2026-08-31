@@ -1,0 +1,7 @@
+{
+  "amount": 760,
+  "archetype": "ambiguous",
+  "id": "eval_12",
+  "reason": "near-expiry card and intermittent shortfall",
+  "should_recover": false
+}

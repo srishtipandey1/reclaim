@@ -1,0 +1,7 @@
+{
+  "amount": 870,
+  "archetype": "ambiguous",
+  "id": "eval_15",
+  "reason": "overlapping near expiry and temporary insufficiency signal",
+  "should_recover": false
+}

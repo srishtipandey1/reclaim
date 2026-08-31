@@ -1,0 +1,7 @@
+{
+  "amount": 800,
+  "archetype": "dead_card",
+  "id": "eval_05",
+  "reason": "card marked expired in customer profile",
+  "should_recover": true
+}

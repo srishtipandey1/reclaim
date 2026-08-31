@@ -1,0 +1,7 @@
+{
+  "amount": 680,
+  "archetype": "dead_card",
+  "id": "eval_02",
+  "reason": "dead card with no new card linked",
+  "should_recover": true
+}

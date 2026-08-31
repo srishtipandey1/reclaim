@@ -1,0 +1,7 @@
+{
+  "amount": 820,
+  "archetype": "dead_card",
+  "id": "design_01",
+  "reason": "expired card on active subscription",
+  "should_recover": true
+}

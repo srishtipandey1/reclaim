@@ -1,0 +1,7 @@
+{
+  "amount": 710,
+  "archetype": "ambiguous",
+  "id": "design_06",
+  "reason": "mixed signal, no clean root cause",
+  "should_recover": false
+}

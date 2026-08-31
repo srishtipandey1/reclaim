@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from src.analyst import FixedAnalyst, InvalidSchemaAnalyst
+from src.analyst import FixedAnalyst, InvalidSchemaAnalyst, RuleBasedAnalyst
 from src.models import AnalystClassification
 from src.policy_engine import PolicyDecision, PolicyEngine
 
@@ -90,3 +90,20 @@ def test_stub_analyst_returns_fixed_classification() -> None:
     assert isinstance(result, AnalystClassification)
     assert result.classification == 'dead_or_expired_card'
     assert result.recommended_action == 'send_update_payment_nudge'
+
+
+def test_rules_based_analyst_uses_case_evidence() -> None:
+    analyst = RuleBasedAnalyst()
+
+    dead_case = analyst.classify({'archetype': 'dead_card', 'reason': 'expired card on active subscription'})
+    assert isinstance(dead_case, AnalystClassification)
+    assert dead_case.classification == 'dead_or_expired_card'
+    assert dead_case.recommended_action == 'send_update_payment_nudge'
+
+    shortfall_case = analyst.classify({'archetype': 'insufficient_funds', 'reason': 'customer underfunded after salary cycle'})
+    assert shortfall_case.classification == 'insufficient_funds_pattern'
+    assert shortfall_case.recommended_action == 'schedule_delayed_manual_charge'
+
+    ambiguous_case = analyst.classify({'archetype': 'ambiguous', 'reason': 'mixed card and funds signals'})
+    assert ambiguous_case.classification == 'ambiguous_or_low_confidence'
+    assert ambiguous_case.recommended_action == 'escalate_to_human'

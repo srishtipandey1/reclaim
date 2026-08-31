@@ -1,0 +1,7 @@
+{
+  "amount": 520,
+  "archetype": "ambiguous",
+  "id": "design_05",
+  "reason": "near-expiry card plus intermittent insufficient funds",
+  "should_recover": false
+}

@@ -1,0 +1,7 @@
+{
+  "amount": 930,
+  "archetype": "dead_card",
+  "id": "eval_01",
+  "reason": "expired card after multiple retries",
+  "should_recover": true
+}

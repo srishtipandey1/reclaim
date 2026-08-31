@@ -1,0 +1,7 @@
+{
+  "amount": 980,
+  "archetype": "insufficient_funds",
+  "id": "design_03",
+  "reason": "prior failed charges with funds short pattern",
+  "should_recover": true
+}

@@ -1,0 +1,16 @@
+| Metric | Dead-card | Insufficient-funds | Ambiguous | Overall |
+|---|---|---|---|---|
+| n | 6 | 6 | 4 | 16 |
+| Recovery rate (95% CI) | 1.000 (0.610, 1.000) | 0.833 (0.436, 0.970) | 0.000 (0.000, 0.490) | 0.688 (0.444, 0.858) |
+| Decision latency (median / p95, ms) | 200 / 200 | 300 / 440 | 440 / 440 | 300 / 440 |
+| Unsafe-action rate | 0.000 | 0.167 | 0.000 | 0.062 |
+| Unnecessary-action rate | 0.000 | 0.167 | 0.000 | 0.062 |
+| Duplicate-action rate | 0.000 | 0.000 | 0.000 | 0.000 |
+| Correct-escalation rate | 0.000 | 0.000 | 1.000 | 0.250 |
+| INR recovered | 4810 | 5890 | 0 | 10700 |
+| Action cost (INR) | 150 | 240 | 160 | 550 |
+| Net recovered value | 4660 | 5650 | -160 | 10150 |
+| Lift vs. blind-retry-once baseline | 0.000 | -0.167 | 0.000 | -0.062 |
+
+Unresolved reasons:
+- eval_12: expected escalation, got RecommendedActionEnum.SCHEDULE_DELAYED_MANUAL_CHARGE (unsafe money action allowed by policy; flagged)

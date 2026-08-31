@@ -1,0 +1,7 @@
+{
+  "amount": 1200,
+  "archetype": "insufficient_funds",
+  "id": "design_04",
+  "reason": "repeated insufficiency pattern over two cycles",
+  "should_recover": true
+}

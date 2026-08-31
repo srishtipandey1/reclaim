@@ -1,0 +1,7 @@
+{
+  "amount": 1100,
+  "archetype": "insufficient_funds",
+  "id": "eval_07",
+  "reason": "insufficient funds pattern in two cycles",
+  "should_recover": true
+}

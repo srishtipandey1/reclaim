@@ -1,0 +1,7 @@
+{
+  "amount": 670,
+  "archetype": "ambiguous",
+  "id": "eval_14",
+  "reason": "shared bank account; unclear root cause",
+  "should_recover": false
+}

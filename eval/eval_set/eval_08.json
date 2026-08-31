@@ -1,0 +1,7 @@
+{
+  "amount": 1430,
+  "archetype": "insufficient_funds",
+  "id": "eval_08",
+  "reason": "customer temporarily underfunded",
+  "should_recover": true
+}

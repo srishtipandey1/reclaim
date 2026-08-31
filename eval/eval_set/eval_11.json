@@ -1,0 +1,7 @@
+{
+  "amount": 1180,
+  "archetype": "insufficient_funds",
+  "id": "eval_11",
+  "reason": "shortfall with no payment method mismatch",
+  "should_recover": true
+}

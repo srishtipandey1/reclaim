@@ -1,0 +1,7 @@
+{
+  "amount": 900,
+  "archetype": "insufficient_funds",
+  "id": "eval_09",
+  "reason": "recent shortfall after salary cycle",
+  "should_recover": true
+}

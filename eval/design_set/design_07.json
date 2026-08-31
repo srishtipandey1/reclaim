@@ -1,0 +1,7 @@
+{
+  "amount": 1500,
+  "archetype": "dead_card",
+  "id": "design_07",
+  "reason": "saved card expired after halted subscription",
+  "should_recover": true
+}

@@ -1,0 +1,7 @@
+{
+  "amount": 640,
+  "archetype": "dead_card",
+  "id": "design_02",
+  "reason": "card expired and no new card on file",
+  "should_recover": true
+}

@@ -1,0 +1,7 @@
+{
+  "amount": 920,
+  "archetype": "ambiguous",
+  "id": "eval_13",
+  "reason": "customer recently updated card but balance still low",
+  "should_recover": false
+}

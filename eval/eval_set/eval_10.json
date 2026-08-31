@@ -1,0 +1,7 @@
+{
+  "amount": 1280,
+  "archetype": "insufficient_funds",
+  "id": "eval_10",
+  "reason": "repeated failure due to bank-side low balance",
+  "should_recover": true
+}

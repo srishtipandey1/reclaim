@@ -1,0 +1,7 @@
+{
+  "amount": 660,
+  "archetype": "dead_card",
+  "id": "eval_06",
+  "reason": "manual retry previously failed because card invalid",
+  "should_recover": true
+}

@@ -1,0 +1,7 @@
+{
+  "amount": 1050,
+  "archetype": "ambiguous",
+  "id": "eval_16",
+  "reason": "two conflicting signals; escalate for manual review",
+  "should_recover": false
+}

@@ -1,0 +1,7 @@
+{
+  "amount": 1100,
+  "archetype": "insufficient_funds",
+  "id": "design_08",
+  "reason": "insufficient funds but customer has history of successful future attempts",
+  "should_recover": true
+}

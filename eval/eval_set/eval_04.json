@@ -1,0 +1,7 @@
+{
+  "amount": 540,
+  "archetype": "dead_card",
+  "id": "eval_04",
+  "reason": "lapsed payment method replaced but not updated",
+  "should_recover": true
+}
