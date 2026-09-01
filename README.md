@@ -46,6 +46,28 @@ Action Executor (CAS-guarded)
 Audit Log
 ```
 
+```mermaid
+flowchart TD
+    A[Razorpay Webhook: payment.failed] --> B[Failure Aggregation<br/>enumerate unpaid invoices]
+    B --> C[LLM Analyst<br/>Groq / gpt-oss-120b]
+    C --> D{validate_raw<br/>schema valid AND<br/>ambiguous escalate only?}
+    D -->|Rejected| E[Escalate to human<br/>malformed / contradictory output]
+    D -->|Valid| F[Policy Engine: decide]
+    F --> G{confidence ge<br/>per-cause threshold?}
+    G -->|No| E
+    G -->|Yes| H{action = escalate_to_human?}
+    H -->|Yes| E
+    H -->|No, nudge or charge| I{action = send_update_payment_nudge?}
+    I -->|Yes| J{within contact window<br/>AND under nudge cap?}
+    J -->|No| K[Rejected, no action taken]
+    J -->|Yes| L[Action Executor, CAS-guarded]
+    I -->|No, scheduled charge| L
+    L --> M[Razorpay API: execute]
+    E --> N[Audit Log]
+    K --> N
+    M --> N
+```
+
 ## Why the policy engine sits between the model and the money
 
 A confidence score is a signal, not a guarantee. The model's `recommended_action` never executes directly — it passes through a deterministic gate first.
