@@ -4,11 +4,8 @@ import json
 import os
 from typing import Any
 
-from dotenv import load_dotenv
 from groq import Groq
 from pydantic import ValidationError
-
-load_dotenv(override=True)
 
 from src.models import AnalystClassification, ClassificationEnum, RecommendedActionEnum
 
@@ -18,14 +15,6 @@ class BaseAnalyst:
         raise NotImplementedError
 
     def validate_raw(self, raw: dict[str, Any]) -> AnalystClassification | None:
-        if not isinstance(raw, dict):
-            return None
-
-        classification = raw.get('classification')
-        recommended_action = raw.get('recommended_action')
-        if str(classification) == 'ambiguous_or_low_confidence' and str(recommended_action) != 'escalate_to_human':
-            return None
-
         try:
             return AnalystClassification.model_validate(raw)
         except ValidationError:
@@ -124,7 +113,6 @@ class GeminiAnalyst(BaseAnalyst):
             'Return JSON only with these keys: classification, confidence, evidence, recommended_action.\n'
             'classification must be exactly one of: dead_or_expired_card, insufficient_funds_pattern, ambiguous_or_low_confidence, already_resolved, duplicate_or_replay.\n'
             'recommended_action must be exactly one of: send_update_payment_nudge, schedule_delayed_manual_charge, escalate_to_human.\n'
-            'If classification is ambiguous_or_low_confidence, recommended_action MUST be escalate_to_human — no other value is valid for that classification.\n'
             'confidence must be a number between 0.0 and 1.0 inclusive.\n'
             'evidence must be a list of strings.\n'
             f'reason: {reason}\namount: {amount}\n'
@@ -170,7 +158,6 @@ class GroqAnalyst(BaseAnalyst):
             'Return JSON only with these keys: classification, confidence, evidence, recommended_action.\n'
             'classification must be exactly one of: dead_or_expired_card, insufficient_funds_pattern, ambiguous_or_low_confidence, already_resolved, duplicate_or_replay.\n'
             'recommended_action must be exactly one of: send_update_payment_nudge, schedule_delayed_manual_charge, escalate_to_human.\n'
-            'If classification is ambiguous_or_low_confidence, recommended_action MUST be escalate_to_human — no other value is valid for that classification.\n'
             'confidence must be a number between 0.0 and 1.0 inclusive.\n'
             'evidence must be a list of strings.\n'
             f'reason: {reason}\namount: {amount}\n'

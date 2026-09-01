@@ -84,6 +84,18 @@ def test_policy_escalates_for_malformed_response() -> None:
     assert decision.reason == 'malformed model output'
 
 
+def test_validate_raw_rejects_ambiguous_with_non_escalate_action() -> None:
+    analyst = RuleBasedAnalyst()
+    raw_response = {
+        'classification': 'ambiguous_or_low_confidence',
+        'confidence': 0.45,
+        'evidence': ['signals are mixed'],
+        'recommended_action': 'send_update_payment_nudge',
+    }
+
+    assert analyst.validate_raw(raw_response) is None
+
+
 def test_stub_analyst_returns_fixed_classification() -> None:
     analyst = FixedAnalyst()
     result = analyst.classify(None)
