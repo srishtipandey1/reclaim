@@ -15,6 +15,14 @@ class BaseAnalyst:
         raise NotImplementedError
 
     def validate_raw(self, raw: dict[str, Any]) -> AnalystClassification | None:
+        if not isinstance(raw, dict):
+            return None
+
+        classification = raw.get('classification')
+        recommended_action = raw.get('recommended_action')
+        if str(classification) == 'ambiguous_or_low_confidence' and str(recommended_action) != 'escalate_to_human':
+            return None
+
         try:
             return AnalystClassification.model_validate(raw)
         except ValidationError:
