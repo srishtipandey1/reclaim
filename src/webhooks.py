@@ -9,21 +9,9 @@ import sqlite3
 from typing import Any
 
 from src.db import get_connection
+from src.state_machine import RAZORPAY_STATES
 
 logger = logging.getLogger(__name__)
-
-VALID_RAZORPAY_STATES = {
-    'created',
-    'authenticated',
-    'active',
-    'pending',
-    'halted',
-    'cancelled',
-    'paused',
-    'expired',
-    'completed',
-}
-
 
 def verify_signature(raw_body: bytes, signature: str | None, secret: str) -> None:
     if signature is None:
@@ -53,7 +41,7 @@ def _normalize_razorpay_state(event_type: str | None, payload: dict[str, Any]) -
 
     entity = get_subscription_entity(payload)
     state = entity.get('status')
-    if state in VALID_RAZORPAY_STATES:
+    if state in RAZORPAY_STATES:
         return state
     if event_type == 'subscription.activated':
         return 'active'

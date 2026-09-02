@@ -28,4 +28,4 @@ class RazorpayClient:
         return self.client.invoice.fetch(invoice_id)
 
     def notify_invoice(self, invoice_id: str, medium: str = 'email') -> dict[str, Any]:
-        return self.client.invoice.notify_by(invoice_id, {'medium': medium})
+        return self.client.invoice.notify_by(invoice_id, medium)
