@@ -9,9 +9,13 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from dotenv import load_dotenv
+
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+
+load_dotenv(ROOT / '.env', override=True)
 
 from src.analyst import GroqAnalyst
 from src.policy_engine import PolicyEngine
@@ -181,10 +185,6 @@ def evaluate_cases(cases: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], l
 
     for case in cases:
         now = datetime(2026, 1, 15, 10, 30)
-        scoring_only = {
-            'archetype': case['archetype'],
-            'should_recover': case['should_recover'],
-        }
         evidence = {
             'reason': case.get('reason', ''),
             'amount': case['amount'],
@@ -255,9 +255,9 @@ def evaluate_cases(cases: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], l
 
 def summarize_records(records: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     groups = {
-        'dead_card': [r for r in records if r['classification'] == 'dead_or_expired_card'],
-        'insufficient_funds': [r for r in records if r['classification'] == 'insufficient_funds_pattern'],
-        'ambiguous': [r for r in records if r['classification'] == 'ambiguous_or_low_confidence'],
+        'dead_card': [r for r in records if r['archetype'] == 'dead_card'],
+        'insufficient_funds': [r for r in records if r['archetype'] == 'insufficient_funds'],
+        'ambiguous': [r for r in records if r['archetype'] == 'ambiguous'],
         'overall': records,
     }
 
@@ -274,9 +274,9 @@ def summarize_records(records: list[dict[str, Any]]) -> dict[str, dict[str, Any]
         duplicate_rate = sum(1 for r in group if r['duplicate_action']) / total if total else 0.0
         correct_escalation = sum(1 for r in group if r['correct_escalation']) / total if total else 0.0
         recovered_rupees = sum(r['recovered_amount'] for r in group)
-        action_cost = sum((25 if r['classification'] == 'dead_or_expired_card' else 40) for r in group if r['decision_status'] == 'allowed')
+        action_cost = sum((25 if r['archetype'] == 'dead_card' else 40) for r in group if r['decision_status'] == 'allowed')
         net = recovered_rupees - action_cost
-        baseline = sum(1 for r in group if r['classification'] in {'dead_or_expired_card', 'insufficient_funds_pattern'}) / total if total else 0.0
+        baseline = sum(1 for r in group if r['archetype'] in {'dead_card', 'insufficient_funds'}) / total if total else 0.0
         lift = rate - baseline
 
         result[name] = {

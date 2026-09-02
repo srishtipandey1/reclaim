@@ -80,7 +80,9 @@ Two layers enforce this:
 
 ## Results
 
-Measured output from `eval/results/run_eval.txt`, 16-case batch:
+Measured output from `eval/results/run_eval.txt`, 16-case batch. The stratified columns are always
+grouped by each fixture's frozen `archetype`, not by the live model's classification, so model
+mistakes remain in the ground-truth bucket they belong to.
 
 | Metric | Dead-card | Insufficient-funds | Ambiguous | Overall |
 |---|---|---|---|---|
@@ -103,8 +105,10 @@ Before the `validate_raw()` coupling fix, overall unsafe-action rate was 0.250 (
 ## Limitations
 
 - **`eval_13`** — model classifies with 0.92 confidence as `insufficient_funds_pattern`; ground truth expects escalation. Calibration issue on the model's side, not a policy or code defect — the policy engine still gates the resulting action correctly against the confidence threshold.
-- **Determinism** — Groq doesn't guarantee bit-exact reproducibility at `temperature=0.0` for MoE-served models. Verification runs here showed consistent output; that's not the same as a provider guarantee.
-- **`GeminiAnalyst`** — scoped, not completed in the time available, removed from the codebase rather than left broken.
+- **Reproducibility** — given a fixed list of classification outputs, the scoring and metrics
+  computation is deterministic and byte-identical. The live Groq classifier is not held to that
+  standard: MoE-served models do not guarantee bit-exact output even at `temperature=0.0`, so the
+  reported table is the canonical output of one explicitly recorded live run.
 
 ## Incident: exposed API key
 
@@ -146,6 +150,8 @@ python scripts/run_eval.py
 ```
 
 `run_eval.py` runs the frozen 16-case evaluation batch through the full pipeline — classifier, policy engine, executor — and writes the results table shown above to `eval/results/run_eval.txt`.
+The live model call can vary between runs; the scoring functions are deterministic once those
+classification outputs are fixed.
 
 ## Build process / roadmap
 

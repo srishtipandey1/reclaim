@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from src.analyst import FixedAnalyst, GeminiAnalyst, InvalidSchemaAnalyst, RuleBasedAnalyst
+from src.analyst import FixedAnalyst, InvalidSchemaAnalyst, RuleBasedAnalyst
 from src.models import AnalystClassification
 from src.policy_engine import PolicyDecision, PolicyEngine
 
@@ -119,35 +119,3 @@ def test_rules_based_analyst_uses_case_evidence() -> None:
     ambiguous_case = analyst.classify({'archetype': 'ambiguous', 'reason': 'mixed card and funds signals'})
     assert ambiguous_case.classification == 'ambiguous_or_low_confidence'
     assert ambiguous_case.recommended_action == 'escalate_to_human'
-
-
-def test_gemini_analyst_uses_only_reason_and_amount(monkeypatch) -> None:
-    captured: dict[str, object] = {}
-
-    class DummyModels:
-        def generate_content(self, **kwargs: object) -> object:
-            captured.update(kwargs)
-            return type('Resp', (), {'text': '{"classification": "dead_or_expired_card", "confidence": 0.9, "evidence": ["expired card"], "recommended_action": "send_update_payment_nudge"}'})()
-
-    class DummyClient:
-        def __init__(self, **kwargs: object) -> None:
-            self.models = DummyModels()
-
-    monkeypatch.setattr('src.analyst.genai', type('DummyGenAI', (), {'Client': DummyClient}), raising=False)
-
-    analyst = GeminiAnalyst()
-    result = analyst.classify({
-        'reason': 'expired card after repeated failures',
-        'amount': 1250,
-        'archetype': 'dead_card',
-        'should_recover': True,
-    })
-
-    assert isinstance(result, AnalystClassification)
-    assert result.classification == 'dead_or_expired_card'
-    assert captured['model'] == 'gemini-flash-latest'
-    contents = str(captured['contents'])
-    assert 'expired card after repeated failures' in contents
-    assert '1250' in contents
-    assert 'archetype' not in contents
-    assert 'should_recover' not in contents

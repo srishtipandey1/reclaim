@@ -1,19 +1,17 @@
 | Metric | Dead-card | Insufficient-funds | Ambiguous | Overall |
 |---|---|---|---|---|
-| n | 6 | 6 | 4 | 16 |
-| Recovery rate (95% CI) | 1.000 (0.610, 1.000) | 0.833 (0.436, 0.970) | 0.000 (0.000, 0.490) | 0.688 (0.444, 0.858) |
-| Decision latency (median / p95, ms) | 200 / 200 | 300 / 440 | 440 / 440 | 300 / 440 |
-| Unsafe-action rate | 0.000 | 0.167 | 0.000 | 0.062 |
-| Unnecessary-action rate | 0.000 | 0.167 | 0.000 | 0.062 |
+| n | 6 | 5 | 5 | 16 |
+| Recovery rate (95% CI) | 1.000 (0.610, 1.000) | 1.000 (0.566, 1.000) | 0.000 (0.000, 0.434) | 0.688 (0.444, 0.858) |
+| Decision latency (median / p95, ms) | 200 / 200 | 300 / 300 | 440 / 440 | 300 / 440 |
+| Unsafe-action rate | 0.000 | 0.000 | 0.400 | 0.125 |
+| Unnecessary-action rate | 0.000 | 0.000 | 0.400 | 0.125 |
 | Duplicate-action rate | 0.000 | 0.000 | 0.000 | 0.000 |
-| Correct-escalation rate | 0.000 | 0.000 | 1.000 | 0.250 |
+| Correct-escalation rate | 0.000 | 0.000 | 0.600 | 0.188 |
 | INR recovered | 4810 | 5890 | 0 | 10700 |
-| Action cost (INR) | 150 | 240 | 160 | 550 |
-| Net recovered value | 4660 | 5650 | -160 | 10150 |
-| Lift vs. blind-retry-once baseline | 0.000 | -0.167 | 0.000 | -0.062 |
+| Action cost (INR) | 150 | 200 | 200 | 550 |
+| Net recovered value | 4660 | 5690 | -200 | 10150 |
+| Lift vs. blind-retry-once baseline | 0.000 | 0.000 | 0.000 | 0.000 |
 
 Unresolved reasons:
 - eval_13: expected escalation, got RecommendedActionEnum.SEND_UPDATE_PAYMENT_NUDGE (unsafe money action allowed by policy; flagged)
-
-Known limitation: eval_13 remains unresolved; the model recommended a payment nudge despite the policy's escalation requirement, so this case is intentionally excluded from a recoverable-positive claim.
-
+- eval_15: expected escalation, got RecommendedActionEnum.SEND_UPDATE_PAYMENT_NUDGE (unsafe money action allowed by policy; flagged)
