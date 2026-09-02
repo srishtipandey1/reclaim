@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from src.analyst import BaseAnalyst
@@ -26,7 +26,9 @@ class PolicyEngine:
 
     def _now_in_allowed_window(self, now: datetime) -> bool:
         start_hhmm, end_hhmm = self._allowed_hours()
-        current = now.strftime('%H:%M')
+        ist = timezone(timedelta(hours=5, minutes=30))
+        local_now = now.replace(tzinfo=ist) if now.tzinfo is None else now.astimezone(ist)
+        current = local_now.strftime('%H:%M')
         return start_hhmm <= current <= end_hhmm
 
     def decide_from_raw(

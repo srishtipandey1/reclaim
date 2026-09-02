@@ -45,3 +45,13 @@ def render_dashboard(db_path: str | Path) -> str:
 
 def write_dashboard(db_path: str | Path, output_path: str | Path) -> None:
     Path(output_path).write_text(render_dashboard(db_path), encoding='utf-8')
+
+
+if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Render the Reclaim dashboard from SQLite.')
+    parser.add_argument('--db', required=True, help='SQLite database path')
+    parser.add_argument('--output', required=True, help='HTML output path')
+    arguments = parser.parse_args()
+    write_dashboard(arguments.db, arguments.output)

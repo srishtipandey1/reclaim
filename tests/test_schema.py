@@ -1,5 +1,7 @@
 import sqlite3
 
+import pytest
+
 from src.db import init_db
 
 
@@ -89,3 +91,26 @@ def test_schema_enforces_state_constraints() -> None:
     assert row[0] == 'halted'
     assert row[1] == 'analyzing'
     assert row[2] == 'live_dashboard'
+
+
+def test_schema_enforces_action_caps() -> None:
+    conn = init_db(':memory:')
+    subscription = conn.execute(
+        "INSERT INTO subscriptions (razorpay_subscription_id, data_source, razorpay_state, case_state) VALUES ('sub_caps', 'fixture', 'halted', 'analyzing')"
+    )
+    subscription_id = subscription.lastrowid
+    invoice = conn.execute(
+        "INSERT INTO invoices (invoice_id, subscription_id, amount) VALUES ('inv_caps', ?, 1000)",
+        (subscription_id,),
+    )
+    invoice_id = invoice.lastrowid
+    for action_type in ('first', 'second', 'third'):
+        conn.execute(
+            'INSERT INTO recovery_actions (subscription_id, invoice_id, action_type) VALUES (?, ?, ?)',
+            (subscription_id, invoice_id, action_type),
+        )
+    with pytest.raises(sqlite3.IntegrityError, match='total action cap'):
+        conn.execute(
+            "INSERT INTO recovery_actions (subscription_id, invoice_id, action_type) VALUES (?, ?, 'fourth')",
+            (subscription_id, invoice_id),
+        )

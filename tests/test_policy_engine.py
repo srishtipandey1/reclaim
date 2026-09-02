@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from src.analyst import FixedAnalyst, InvalidSchemaAnalyst, RuleBasedAnalyst
 from src.models import AnalystClassification
@@ -35,6 +35,19 @@ def test_policy_rejects_nudge_outside_allowed_hours() -> None:
         now=_now(21, 0),
     )
     assert decision.status == 'rejected'
+
+
+def test_policy_converts_aware_time_to_ist_before_contact_check() -> None:
+    engine = PolicyEngine()
+    decision = engine.decide(
+        recommended_action='send_update_payment_nudge',
+        classification='dead_or_expired_card',
+        confidence=0.92,
+        current_case_state='analyzing',
+        prior_actions_on_invoice=[],
+        now=datetime(2026, 1, 15, 4, 0, tzinfo=timezone.utc),
+    )
+    assert decision.status == 'allowed'
 
 
 def test_policy_allows_delayed_manual_charge_when_threshold_met() -> None:
