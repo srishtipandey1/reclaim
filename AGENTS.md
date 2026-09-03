@@ -233,6 +233,15 @@ its recovery rate.
 from a single command. If two runs don't produce identical output, something is non-deterministic
 and must be fixed before this number goes in the README.
 
+**Reproducibility has two separate, honestly-distinguished claims, not one.** The scoring and
+metrics computation, given a fixed list of classification outputs, is byte-exact deterministic and
+provable — feed the same records through the scorer twice, confirm identical bytes. The live
+Analyst call itself is not held to that standard: LLM providers, including MoE-served models at
+temperature 0.0, do not guarantee bit-exact output run to run. The correct practice is to run the
+full live pipeline once, save that run's output as the canonical reported result, and state plainly
+in the README that a live classifier means run-to-run variance is expected — this is not a
+reproducibility failure, it is an honestly-scoped claim about what is and isn't deterministic.
+
 ## 8. Anti-slop rules — follow these regardless of which tool you are
 
 - Work one bounded task at a time, exactly as scoped in Section 11. Never expand scope to "while
@@ -248,6 +257,11 @@ and must be fixed before this number goes in the README.
 - After completing a task, state in plain language what you built and why, in two or three
   sentences. If you cannot explain it simply, the implementation is probably more complex than it
   needs to be.
+- Never print or output a raw secret value — API key, token, password — anywhere, for any reason,
+  including "proving" it's set correctly. Check and report presence or absence only ("present" /
+  "blank"). A secret that has appeared in any terminal output, log, or message outside the local
+  .env file must be treated as compromised and rotated immediately, regardless of whether it still
+  appears to authenticate successfully.
 
 ## 9. `policy.yaml` — create this exact file at the project root
 
