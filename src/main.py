@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
 from fastapi import BackgroundTasks, FastAPI, Request
@@ -13,15 +14,16 @@ from src.webhooks import process_webhook_event, verify_signature
 load_dotenv()
 
 logger = logging.getLogger(__name__)
-app = FastAPI(title="Razorpay Recovery Agent")
-app.state.db_path = str(get_db_path())
-
-
-@app.on_event("startup")
-def startup() -> None:
+@asynccontextmanager
+async def startup(app: FastAPI):
     db_path = get_db_path()
     app.state.db_path = str(db_path)
     init_db(db_path)
+    yield
+
+
+app = FastAPI(title="Razorpay Recovery Agent", lifespan=startup)
+app.state.db_path = str(get_db_path())
 
 
 @app.get("/health")
